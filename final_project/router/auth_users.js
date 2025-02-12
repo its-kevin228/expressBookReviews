@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken');
 let books = require("./booksdb.js").default;
 const regd_users = express.Router();
 
-let users = [];
+let users = {};
 
-const SECRET_KEY = "pekpelir"; // Remplace par une clé plus sécurisée en production
+const SECRET_KEY = "pekpeli"; // Remplace par une clé plus sécurisée en production
 
 // Vérifier si le nom d'utilisateur est valide (existe déjà ou non)
 const isValid = (username) => {

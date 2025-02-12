@@ -1,8 +1,10 @@
 const express = require('express');
-let books = require("./booksdb.js").default;
-let isValid = require("./auth_users.js").isValid;
-let users = require("./auth_users.js").users;
+const books = require("./booksdb.js"); // Suppression du ".default" pour éviter une erreur
+const { isValid, users } = require("./auth_users.js"); // Destructuring pour récupérer les valeurs correctement
 const public_users = express.Router();
+
+// Middleware pour parser le JSON
+public_users.use(express.json());
 
 // Enregistrement d'un nouvel utilisateur
 public_users.post("/register", (req, res) => {
@@ -10,6 +12,11 @@ public_users.post("/register", (req, res) => {
 
   if (!username || !password) {
     return res.status(400).json({ message: "Nom d'utilisateur et mot de passe requis" });
+  }
+
+  // Vérifier si users est bien un objet (et non un tableau)
+  if (typeof users !== "object" || Array.isArray(users)) {
+    return res.status(500).json({ message: "Erreur interne : format des utilisateurs invalide." });
   }
 
   if (users[username]) {
@@ -70,12 +77,7 @@ public_users.get('/review/:isbn', (req, res) => {
     return res.status(404).json({ message: "Livre non trouvé" });
   }
 
-  return res.status(200).json(book.reviews);
-});
-
-// Récupérer la liste de tous les livres disponibles
-public_users.get('/', function (req, res) {
-  return res.status(200).json(books);
+  return res.status(200).json(book.reviews || {});
 });
 
 module.exports.general = public_users;
