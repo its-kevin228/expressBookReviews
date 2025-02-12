@@ -1,22 +1,35 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const session = require('express-session')
-const customer_routes = require('./router/auth_users.js').authenticated;
-const genl_routes = require('./router/general.js').general;
+const express = require("express");
+const session = require("express-session");
+const jwt = require("jsonwebtoken");
+
+const customer_routes = require("./router/auth_users").regd_users; // Changez .authenticated en .regd_users
+const general_routes = require("./router/general").general;
 
 const app = express();
 
 app.use(express.json());
 
-app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
+// Configuration de la session
+app.use(session({
+    secret: "pekpeli",
+    resave: false,
+    saveUninitialized: true,
+}));
 
-app.use("/customer/auth/*", function auth(req,res,next){
-//Write the authenication mechanism here
+// Middleware d'authentification basé sur la session
+app.use("/customer/auth/*", function auth(req, res, next) {
+    if (req.session.username) {
+        next();
+    } else {
+        return res.status(403).json({ message: "Accès interdit. Veuillez vous connecter." });
+    }
 });
- 
-const PORT =5000;
 
+// Routes publiques
+app.use("/", general_routes);
+
+// Routes protégées (authentification requise)
 app.use("/customer", customer_routes);
-app.use("/", genl_routes);
 
-app.listen(PORT,()=>console.log("Server is running"));
+const PORT = 3000;
+app.listen(PORT, () => console.log(`Serveur en cours d'exécution sur le port ${PORT}`));
